@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRIP</title>
+<meta name="description" content="Tripwire: robot agents that program their own interrupts under human disturbance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="conf"><b>Under review</b> Anonymous submission</span>
+    <h1>Trip<span class="hr">wire</span></h1>
+    <p class="tagline">Robot agents that program their own interrupts under human disturbance.</p>
+    <div class="authors"><p class="names"><span>Anonymous authors</span></p></div>
+    <div class="btns">
+      <a class="btn disabled" title="Released after review"><svg viewBox="0 0 24 24"><path d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5zM8 13h8v1.6H8V13zm0 3.6h8v1.6H8v-1.6z"/></svg>Paper</a>
+      <a class="btn disabled" title="Released after review"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Code</a>
+      <a class="btn" href="#method">Method</a>
+      <a class="btn" href="#results">Results</a>
+      <a class="btn" href="#real">Real robot</a>
+    </div>
+    <div class="hero">
+      <video data-src="teaser_sim.mp4" poster="teaser_sim.jpg" muted loop playsinline preload="none"></video>
+      <p class="hero-cap">Each red flash is the agent's own tripwire firing: in simulation and on the real arm.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="numbers">
+    <div class="num"><b>81.3%</b><span>safety, vs. 61.3% turn-based</span></div>
+    <div class="num"><b>38.7%</b><span>success, vs. 31.0%</span></div>
+    <div class="num"><b>&minus;36%</b><span>agent turns per minute</span></div>
+    <div class="num"><b>11/20</b><span>real-robot trials, vs. 2</span></div>
+  </div>
+</div>
+
+<section id="method">
+  <div class="wrap">
+    <p class="eyebrow">Method</p>
+    <h2>The agent writes its own interrupts</h2>
+    <p class="lede measure">With every policy call, the agent also writes a <em>tripwire</em>: a small Python program that watches the scene while the policy runs and hands control back when something needs a decision.</p>
+    <figure class="panel"><img src="fig1.jpg" alt="TRIP in one episode" loading="lazy"></figure>
+    <div class="twocol">
+      <figure class="panel"><img src="fig2.png" alt="TRIP overview" loading="lazy"></figure>
+      <div>
+        <h3>A tripwire</h3>
+<pre><span class="c"># (m', z) = w(obs, m)</span>
+<span class="k">if</span> vlm(<span class="s">"person in view?"</span>):
+    <span class="k">if</span> dist(person) &lt; <span class="n">0.3</span>:
+        <span class="k">return</span> <span class="s">"person near"</span>
+    <span class="k">if</span> vlm(<span class="s">"hand near arm?"</span>):
+        <span class="k">return</span> <span class="s">"reaching"</span></pre>
+        <div class="findings">
+          <div class="finding"><b>Fires</b><p>The policy halts and the agent gets the reason.</p></div>
+          <div class="finding"><b>Rewritten</b><p>Each new call comes with a new tripwire.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="robohd">
+  <div class="wrap">
+    <p class="eyebrow">RoboHD benchmark &middot; 168 scenes</p>
+    <h2>Four ways a person gets in the way</h2>
+    <p class="lede measure">42 RoboCasa365 tasks &times; 4 disturbance types. Touching the person fails the episode. Clips: TRIP with XR,</p>
+    <div class="conds">
+      <div class="cond spa">
+        <video data-src="dspa_mop_route_make_ice_lemonade_card.mp4" poster="dspa_mop_route_make_ice_lemonade_card.jpg" muted loop playsinline preload="none"></video>
+        <div class="body"><p class="role">Spatial</p><h3>Blocks the route</h3><p>Wait or take another path.</p><p class="example">Mopping across the way to the fridge.</p></div>
+      </div>
+      <div class="cond obj">
+        <video data-src="dobj_pull_board_set_up_cutting_station_card.mp4" poster="dobj_pull_board_set_up_cutting_station_card.jpg" muted loop playsinline preload="none"></video>
+        <div class="body"><p class="role">Object state</p><h3>Moves the target</h3><p>Adapt to its new position.</p><p class="example">Pulls the cutting board away.</p></div>
+      </div>
+      <div class="cond tsk">
+        <video data-src="dtask_close_fridge_prepare_smoothie_card.mp4" poster="dtask_close_fridge_prepare_smoothie_card.jpg" muted loop playsinline preload="none"></video>
+        <div class="body"><p class="role">Task state</p><h3>Changes a fixture</h3><p>Restore it or replan.</p><p class="example">Closes the fridge the robot opened.</p></div>
+      </div>
+      <div class="cond per">
+        <video data-src="dper_grate_beside_mixed_fruit_platter_card.mp4" poster="dper_grate_beside_mixed_fruit_platter_card.jpg" muted loop playsinline preload="none"></video>
+        <div class="body"><p class="role">Perceptual</p><h3>Works nearby</h3><p>Keep going, keep clear.</p><p class="example">Grating beside the robot.</p></div>
+      </div>
+    </div>
+    <details class="task-results">
+      <summary>More episodes <span>(4)</span></summary>
+      <div class="conds inner">
+        <div class="cond spa"><video data-src="dspa_sweep_route_arrange_tea_accompaniments_card.mp4" poster="dspa_sweep_route_arrange_tea_accompaniments_card.jpg" muted loop playsinline preload="none"></video><div class="body"><p class="role">Spatial</p><p class="example">Sweeping along the robot's path.</p></div></div>
+        <div class="cond obj"><video data-src="dobj_slide_brush_sanitize_prep_cutting_board_card.mp4" poster="dobj_slide_brush_sanitize_prep_cutting_board_card.jpg" muted loop playsinline preload="none"></video><div class="body"><p class="role">Object state</p><p class="example">Slides the brush out of reach.</p></div></div>
+        <div class="cond tsk"><video data-src="dtask_close_cabinet_sorting_cleanup_card.mp4" poster="dtask_close_cabinet_sorting_cleanup_card.jpg" muted loop playsinline preload="none"></video><div class="body"><p class="role">Task state</p><p class="example">Closes the cabinet the robot needs.</p></div></div>
+        <div class="cond per"><video data-src="dper_chop_beside_set_up_cutting_station_card.mp4" poster="dper_chop_beside_set_up_cutting_station_card.jpg" muted loop playsinline preload="none"></video><div class="body"><p class="role">Perceptual</p><p class="example">Chopping at the next counter.</p></div></div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <p class="eyebrow">Results</p>
+    <h2>Safer, without losing success</h2>
+    <p class="lede measure">168 scenes with a person, four robot policies. Same agent (GPT-6.1-sol) and tools; only the harness changes.</p>
+    <div class="mkey"><span><i class="k-base"></i>Policy alone</span><span><i class="k-ag"></i>Agentic (turn-based)</span><span><i class="k-trip"></i>TRIP</span></div>
+    <div class="chart2">
+      <figure class="chart"><figcaption><b>Success</b> <small>% of scenes, &uarr;</small></figcaption><svg id="ch-succ" role="img" aria-label="Success per policy and method"></svg></figure>
+      <figure class="chart"><figcaption><b>Safety</b> <small>% without human contact, &uarr;</small></figcaption><svg id="ch-safe" role="img" aria-label="Safety per policy and method"></svg></figure>
+    </div>
+    <p class="note">Small number under each TRIP dot: change vs. Agentic, in points. Safety counts scenes that one method solves without the person.</p>
+    <details class="task-results"><summary>Show as table</summary>
+      <div class="tablewrap"><table class="results" id="summary"></table></div>
+      <p class="legend"><span><i style="background:var(--best)"></i>best</span><span><i style="background:var(--second)"></i>second best</span><span>Safety over scenes that one method solves without the person.</span></p>
+    </details>
+
+    <h3 class="sub">Success by disturbance type</h3>
+    <p class="note">Darker = higher success; bold = best of the three methods for that policy.</p>
+    <div class="tablewrap"><table class="heat" id="percat"></table></div>
+
+    <div class="twocol gap">
+      <div>
+        <h3>Rewriting the tripwire matters</h3>
+        <p class="note">Only the rewritten tripwire is both safe and successful.</p>
+        <figure class="chart"><svg id="ch-abl" role="img" aria-label="Ablation: success against safety"></svg></figure>
+      </div>
+      <div>
+        <h3>Fewer agent turns</h3>
+        <p class="note">The agent is only asked when its tripwire fires.</p>
+        <div id="ch-turns" class="pairs"></div>
+        <div class="facts"><div class="fact"><b>0.24 s</b><span>per tripwire check on the real robot</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="real">
+  <div class="wrap">
+    <p class="eyebrow">Real robot</p>
+    <h2>xArm 7 with &pi;<sub>0.5</sub></h2>
+    <p class="lede measure">A person blocks the arm or takes the object away. 10 table setups per task.</p>
+    <div class="twocol">
+      <figure class="clip"><video data-src="real_block_mug_a.mp4" poster="real_block_mug_a.jpg" muted loop playsinline preload="none"></video><figcaption>Hand reaches in &rarr; stop &rarr; resume.</figcaption></figure>
+      <figure class="clip"><video data-src="real_block_mug_b.mp4" poster="real_block_mug_b.jpg" muted loop playsinline preload="none"></video><figcaption>Repeated interference.</figcaption></figure>
+    </div>
+    <figure class="panel"><img src="fig4.jpg" alt="Real-robot episodes" loading="lazy"></figure>
+    <div class="tablewrap narrow"><table class="results">
+      <thead><tr><th>Task / method</th><th>No disturbance</th><th>Block</th><th>Move object</th></tr></thead>
+      <tbody>
+        <tr class="group spa"><td colspan="4">Mug</td></tr>
+        <tr><td>&pi;<sub>0.5</sub> alone</td><td>5</td><td>0</td><td>0</td></tr>
+        <tr><td>Agentic</td><td class="best">6</td><td>0</td><td class="second">2</td></tr>
+        <tr><td>TRIP</td><td class="best">6</td><td class="best">6</td><td class="best">5</td></tr>
+        <tr class="group spa"><td colspan="4">Towel</td></tr>
+        <tr><td>&pi;<sub>0.5</sub> alone</td><td class="best">7</td><td>0</td><td>1</td></tr>
+        <tr><td>Agentic</td><td class="second">6</td><td>0</td><td class="second">3</td></tr>
+        <tr><td>TRIP</td><td class="best">7</td><td class="best">7</td><td class="best">7</td></tr>
+      </tbody></table></div>
+  </div>
+</section>
+
+<div class="citation-disclosure"><details><summary>Abstract</summary><div class="abstract measure">
+  <p>Agent harnesses are turn-based: the agent acts, waits for the result, then reasons. When the action invokes a pretrained robot policy, such as a vision-language-action (VLA) or world action model (WAM), the policy may react continuously to observations, but the agent cannot revisit its decision until the call returns. Meanwhile, a person may step into the robot's path or move the object it is about to grasp. Invoking the agent more often narrows this blind interval, but a reasoning model takes seconds per decision and most control steps need no new one.</p>
+  <p>We propose TRIP, a training-free, event-driven harness in which the agent programs its own interrupts. With each call, the agent writes a tripwire: a lightweight, stateful Python program that runs alongside the policy, can query a compact VLM (for example, to locate a person and measure their distance), and decides whether the call continues or control returns to the agent. When it fires, the harness halts the policy and returns control with the reason; the agent then reassesses, adapts, and continues under a rewritten tripwire.</p>
+  <p>We evaluate TRIP with three VLAs and one WAM on 168 RoboCasa365 scenes in which a simulated person disturbs the robot and any human–robot contact counts as failure. Compared with a turn-based harness using the same agent and tools, TRIP halves the rate of human contact with the strongest policy, raising safety from 61.3% to 81.3%, without sacrificing task success (38.7% vs. 31.0%). Real-robot experiments show that TRIP completes a manipulation task under human interference where the turn-based harness and the policy alone largely fail.</p>
+</div></details></div>
+
+
+<footer>
+  <div class="wrap">
+    <span>TRIP &middot; under review &middot; please do not distribute</span>
+    <span>Built on RoboCasa365 &middot; MuJoCo</span>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>
